@@ -117,7 +117,7 @@ fn main4() {
 use tracing::{info_span, event, Level};
 use tracing_subscriber::{self, EnvFilter};
 
-fn main() {
+fn main5() {
     tracing_subscriber::fmt().with_env_filter(EnvFilter::from_default_env()).init();
     let outer_span = info_span!("outer_span", user = "ferris");
     let _outer_enter = outer_span.enter();
@@ -131,5 +131,20 @@ fn main() {
     }
 
     event!(Level::WARN, "exit warnings");
+}
 
+use tracing::instrument;
+
+#[instrument]
+fn compute(x : i32, y: i32) -> i32 {
+    event!(Level::TRACE, "start calc");
+    let result = x + y;
+    event!(Level::INFO, result = result);
+    result
+}
+
+fn main() {
+    tracing_subscriber::fmt()
+    .with_env_filter(EnvFilter::from_default_env()).init();
+    compute(5, 10);
 }
