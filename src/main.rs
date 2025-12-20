@@ -100,7 +100,7 @@ fn main3() {
 
 }
 
-fn main() {
+fn main4() {
     let logs = vec![
         "1625097600,tag1, tag2",
     ];
@@ -112,4 +112,24 @@ fn main() {
         println!("timestamp {} tags {:?}", entry.timestamp, entry.tags);
     }
     println!("{:?}", duration);
+}
+
+use tracing::{info_span, event, Level};
+use tracing_subscriber::{self, EnvFilter};
+
+fn main() {
+    tracing_subscriber::fmt().with_env_filter(EnvFilter::from_default_env()).init();
+    let outer_span = info_span!("outer_span", user = "ferris");
+    let _outer_enter = outer_span.enter();
+
+    event!(Level::INFO, "enter outer_span");
+
+    {
+        let inner_span = info_span!("inner_span");
+        let _inner_enter = inner_span.enter();
+        event!(Level::DEBUG, message = "inner event", value = 42);
+    }
+
+    event!(Level::WARN, "exit warnings");
+
 }
