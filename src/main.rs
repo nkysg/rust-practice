@@ -2,6 +2,7 @@
 
 use std::time::Instant;
 
+use futures::channel::mpsc;
 use serde::{Serialize, Deserialize};
 use smallvec::{SmallVec, smallvec};
 
@@ -143,8 +144,42 @@ fn compute(x : i32, y: i32) -> i32 {
     result
 }
 
-fn main() {
+fn main6() {
     tracing_subscriber::fmt()
     .with_env_filter(EnvFilter::from_default_env()).init();
     compute(5, 10);
+}
+
+use futures::executor::block_on;
+
+async fn hello_world() {
+    println!("Hello, async world");
+}
+
+fn main7() {
+    let future = hello_world();
+    block_on(future);
+}
+
+use futures::{stream::{self, StreamExt}, SinkExt};
+
+async fn count_stream() {
+    let mut stream = stream::iter(1..=5);
+    while let Some(value) = stream.next().await {
+        println!("value: {}", value);
+    }
+}
+
+fn main8() {
+    block_on(count_stream());
+}
+
+async fn send_values() {
+    let (mut tx, rx) = mpsc::unbounded::<i32>();
+    tx.send(42).await.unwrap();
+    drop(tx);
+}
+
+fn main() {
+    block_on(send_values());
 }
